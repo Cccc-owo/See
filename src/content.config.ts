@@ -3,11 +3,6 @@ import type { CollectionConfig } from "astro/content/config";
 import { glob } from "astro/loaders";
 import { z } from "astro/zod";
 
-const postsLoader = glob({
-	base: "./src/content/posts",
-	pattern: "**/*.{md,mdx}",
-});
-
 const postsSchema = z.object({
 	title: z.string(),
 	published: z.date(),
@@ -26,31 +21,70 @@ const postsSchema = z.object({
 	nextSlug: z.string().default(""),
 });
 
-const postsCollection: CollectionConfig<
+const personalPostsLoader = glob({
+	base: "./src/content/personal/posts",
+	pattern: "**/*.{md,mdx}",
+});
+
+const personalPostsCollection: CollectionConfig<
 	typeof postsSchema,
-	typeof postsLoader
+	typeof personalPostsLoader
 > = defineCollection({
-	loader: postsLoader,
+	loader: personalPostsLoader,
 	schema: postsSchema,
 });
 
-const specLoader = glob({
-	base: "./src/content/spec",
+const templatePostsLoader = glob({
+	base: "./src/content/template/posts",
 	pattern: "**/*.{md,mdx}",
+});
+
+const templatePostsCollection: CollectionConfig<
+	typeof postsSchema,
+	typeof templatePostsLoader
+> = defineCollection({
+	loader: templatePostsLoader,
+	schema: postsSchema,
 });
 
 const specSchema = z.object({});
 
-const specCollection: CollectionConfig<typeof specSchema, typeof specLoader> =
+const personalSpecLoader = glob({
+	base: "./src/content/personal/spec",
+	pattern: "**/*.{md,mdx}",
+});
+
+const personalSpecCollection: CollectionConfig<
+	typeof specSchema,
+	typeof personalSpecLoader
+> =
 	defineCollection({
-		loader: specLoader,
+		loader: personalSpecLoader,
+		schema: specSchema,
+	});
+
+const templateSpecLoader = glob({
+	base: "./src/content/template/spec",
+	pattern: "**/*.{md,mdx}",
+});
+
+const templateSpecCollection: CollectionConfig<
+	typeof specSchema,
+	typeof templateSpecLoader
+> =
+	defineCollection({
+		loader: templateSpecLoader,
 		schema: specSchema,
 	});
 
 export const collections: {
-	posts: typeof postsCollection;
-	spec: typeof specCollection;
+	personalPosts: typeof personalPostsCollection;
+	templatePosts: typeof templatePostsCollection;
+	personalSpec: typeof personalSpecCollection;
+	templateSpec: typeof templateSpecCollection;
 } = {
-	posts: postsCollection,
-	spec: specCollection,
+	personalPosts: personalPostsCollection,
+	templatePosts: templatePostsCollection,
+	personalSpec: personalSpecCollection,
+	templateSpec: templateSpecCollection,
 };

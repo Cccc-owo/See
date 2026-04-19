@@ -1,16 +1,49 @@
-import { type CollectionEntry, getCollection } from "astro:content";
+import { type CollectionEntry, getCollection, getEntry } from "astro:content";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import { getCategoryUrl } from "@utils/url-utils.ts";
 
-type PostEntry = CollectionEntry<"posts">;
+export type PostEntry =
+	| CollectionEntry<"personalPosts">
+	| CollectionEntry<"templatePosts">;
+
+export type SpecEntry =
+	| CollectionEntry<"personalSpec">
+	| CollectionEntry<"templateSpec">;
+
+async function getPersonalPosts(): Promise<CollectionEntry<"personalPosts">[]> {
+	return getCollection("personalPosts", ({ data }) => {
+		return import.meta.env.PROD ? data.draft !== true : true;
+	});
+}
+
+async function getTemplatePosts(): Promise<CollectionEntry<"templatePosts">[]> {
+	return getCollection("templatePosts", ({ data }) => {
+		return import.meta.env.PROD ? data.draft !== true : true;
+	});
+}
+
+export async function getActivePosts(): Promise<PostEntry[]> {
+	const personalPosts = await getPersonalPosts();
+	if (personalPosts.length > 0) {
+		return personalPosts;
+	}
+
+	return getTemplatePosts();
+}
+
+export async function getActiveSpecEntry(id: string): Promise<SpecEntry | null> {
+	const personalSpecEntries = await getCollection("personalSpec");
+	if (personalSpecEntries.length > 0) {
+		return (await getEntry("personalSpec", id)) ?? null;
+	}
+
+	return (await getEntry("templateSpec", id)) ?? null;
+}
 
 // // Retrieve posts and sort them by publication date
 async function getRawSortedPosts(): Promise<PostEntry[]> {
-	const allBlogPosts = await getCollection("posts", ({ data }) => {
-		return import.meta.env.PROD ? data.draft !== true : true;
-	});
-
+	const allBlogPosts = await getActivePosts();
 	const sorted = allBlogPosts.sort((a, b) => {
 		const dateA = new Date(a.data.published);
 		const dateB = new Date(b.data.published);
@@ -35,7 +68,7 @@ export async function getSortedPosts(): Promise<PostEntry[]> {
 }
 export type PostForList = {
 	slug: string;
-	data: CollectionEntry<"posts">["data"];
+	data: PostEntry["data"];
 };
 export async function getSortedPostsList(): Promise<PostForList[]> {
 	const sortedFullPosts = await getRawSortedPosts();
@@ -54,9 +87,7 @@ export type Tag = {
 };
 
 export async function getTagList(): Promise<Tag[]> {
-	const allBlogPosts = await getCollection<"posts">("posts", ({ data }) => {
-		return import.meta.env.PROD ? data.draft !== true : true;
-	});
+	const allBlogPosts = await getActivePosts();
 
 	const countMap: { [key: string]: number } = {};
 	allBlogPosts.forEach((post: { data: { tags: string[] } }) => {
@@ -81,9 +112,7 @@ export type Category = {
 };
 
 export async function getCategoryList(): Promise<Category[]> {
-	const allBlogPosts = await getCollection<"posts">("posts", ({ data }) => {
-		return import.meta.env.PROD ? data.draft !== true : true;
-	});
+	const allBlogPosts = await getActivePosts();
 	const count: { [key: string]: number } = {};
 	allBlogPosts.forEach((post: { data: { category: string | null } }) => {
 		if (!post.data.category) {
