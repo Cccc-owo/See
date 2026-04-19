@@ -8,6 +8,7 @@ const postsSchema = z.object({
 	published: z.date(),
 	updated: z.date().optional(),
 	draft: z.boolean().optional().default(false),
+	pinned: z.boolean().optional().default(false),
 	description: z.string().optional().default(""),
 	image: z.string().optional().default(""),
 	tags: z.array(z.string()).optional().default([]),
@@ -57,11 +58,10 @@ const personalSpecLoader = glob({
 const personalSpecCollection: CollectionConfig<
 	typeof specSchema,
 	typeof personalSpecLoader
-> =
-	defineCollection({
-		loader: personalSpecLoader,
-		schema: specSchema,
-	});
+> = defineCollection({
+	loader: personalSpecLoader,
+	schema: specSchema,
+});
 
 const templateSpecLoader = glob({
 	base: "./src/content/template/spec",
@@ -71,11 +71,10 @@ const templateSpecLoader = glob({
 const templateSpecCollection: CollectionConfig<
 	typeof specSchema,
 	typeof templateSpecLoader
-> =
-	defineCollection({
-		loader: templateSpecLoader,
-		schema: specSchema,
-	});
+> = defineCollection({
+	loader: templateSpecLoader,
+	schema: specSchema,
+});
 
 export const collections: {
 	personalPosts: typeof personalPostsCollection;

@@ -32,7 +32,9 @@ export async function getActivePosts(): Promise<PostEntry[]> {
 	return getTemplatePosts();
 }
 
-export async function getActiveSpecEntry(id: string): Promise<SpecEntry | null> {
+export async function getActiveSpecEntry(
+	id: string,
+): Promise<SpecEntry | null> {
 	const personalSpecEntries = await getCollection("personalSpec");
 	if (personalSpecEntries.length > 0) {
 		return (await getEntry("personalSpec", id)) ?? null;
@@ -45,6 +47,10 @@ export async function getActiveSpecEntry(id: string): Promise<SpecEntry | null> 
 async function getRawSortedPosts(): Promise<PostEntry[]> {
 	const allBlogPosts = await getActivePosts();
 	const sorted = allBlogPosts.sort((a, b) => {
+		if (a.data.pinned !== b.data.pinned) {
+			return a.data.pinned ? -1 : 1;
+		}
+
 		const dateA = new Date(a.data.published);
 		const dateB = new Date(b.data.published);
 		return dateA > dateB ? -1 : 1;

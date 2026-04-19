@@ -58,6 +58,11 @@ const { remarkPluginFrontmatter } = await render(entry);
         before:absolute before:top-[35px] before:left-[18px] before:hidden md:before:block
         ">
             {title}
+            {entry.data.pinned && (
+                <span class="inline-flex align-middle ml-3 px-2 py-1 rounded-md text-xs font-bold bg-[var(--btn-regular-bg)] text-[var(--btn-content)]">
+                    {i18n(I18nKey.pinned)}
+                </span>
+            )}
             <Icon class="inline text-[2rem] text-[var(--primary)] md:hidden translate-y-0.5 absolute" name="material-symbols:chevron-right-rounded" ></Icon>
             <Icon class="text-[var(--primary)] text-[2rem] transition hidden md:inline absolute translate-y-0.5 opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0" name="material-symbols:chevron-right-rounded"></Icon>
         </a>

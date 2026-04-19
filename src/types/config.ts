@@ -87,6 +87,7 @@ export type BlogPostData = {
 	body: string;
 	title: string;
 	published: Date;
+	pinned?: boolean;
 	description: string;
 	tags: string[];
 	draft?: boolean;
